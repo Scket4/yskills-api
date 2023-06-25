@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+}
+
+model User {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  email         String       @unique
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  name          String?      @default("name")
+  lastName      String?      @default("lastName")
+  password      String
+  telegramId    Int?         @unique @default(0)
+  verified      Boolean      @default(false)
+  deleted       Boolean      @default(false)
+  createdCourse Course[]
+  userCourses   UserCourse[]
+}
+
+model Course {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  title        String             @default("Course title")
+  description  String?            @default("Course description")
+  duration     Int?               @default(90)
+  published    Boolean            @default(false)
+  deleted      Boolean            @default(false)
+  author       User               @relation(fields: [authorId], references: [id])
+  authorId     String             @db.ObjectId
+  level        Level              @relation(fields: [levelId], references: [id])
+  levelId      String             @db.ObjectId
+  chapters     Chapter[]
+  userCourses  UserCourse[]
+  technologies TechnologyCourse[]
+}
+
+model Chapter {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String   @default("Chapter title")
+  description String?  @default("Chapter description")
+  deleted     Boolean  @default(false)
+  order       Int      @default(0)
+  Course      Course   @relation(fields: [courseId], references: [id])
+  courseId    String   @db.ObjectId
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  title       String       @default("Lesson title")
+  description String?      @default("Lesson description")
+  content     String?      @default("Lesson content")
+  deleted     Boolean      @default(false)
+  order       Int          @default(0)
+  Chapter     Chapter      @relation(fields: [chapterId], references: [id])
+  chapterId   String       @db.ObjectId
+  UserCourse  UserCourse[]
+  LessonFile  LessonFile[]
+}
+
+model Technology {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  title             String             @default("Technology title")
+  description       String?            @default("Technology description")
+  TechnologyCourses TechnologyCourse[]
+}
+
+model Level {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String   @default("Level title")
+  description String?  @default("Level description")
+  courses     Course[]
+}
+
+model TechnologyCourse {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  technology   Technology @relation(fields: [technologyId], references: [id])
+  technologyId String     @db.ObjectId
+  course       Course     @relation(fields: [courseId], references: [id])
+  courseId     String     @db.ObjectId
+}
+
+model UserCourse {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  startedAt  DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String       @db.ObjectId
+  course     Course       @relation(fields: [courseId], references: [id])
+  courseId   String       @db.ObjectId
+  Lesson     Lesson       @relation(fields: [lessonId], references: [id])
+  lessonId   String       @db.ObjectId
+  CourseFile CourseFile[]
+}
+
+model CourseFile {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  path         String     @default("index.js")
+  content      String     @default("console.log('Hello world')")
+  userCourse   UserCourse @relation(fields: [userCourseId], references: [id])
+  userCourseId String     @db.ObjectId
+}
+
+model LessonFile {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String @default("index.js")
+  Lesson   Lesson @relation(fields: [lessonId], references: [id])
+  lessonId String @db.ObjectId
+}
