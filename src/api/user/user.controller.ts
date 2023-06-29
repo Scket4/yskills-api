@@ -5,42 +5,43 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
-  HttpStatus,
-  HttpException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
-import { ApiCreatedResponse } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { Prisma } from '@prisma/client';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('user')
 @ApiTags('User')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  @ApiCreatedResponse({ type: UserEntity })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Get('')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: UserEntity })
+  async profile(@Request() { user }: any) {
+    return this.userService.findOne(user.sub);
   }
 
-  @Get()
+  @Get('users')
+  @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UserEntity, isArray: true })
   findAll() {
     return this.userService.findAll();
   }
 
-  @Get(':id')
+  @Get('id/:id')
+  @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UserEntity })
   async findOne(@Param('id') id: string) {
     return await this.userService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UserEntity })
   update(
     @Param('id') id: string,

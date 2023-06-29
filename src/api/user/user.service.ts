@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 
@@ -16,7 +15,6 @@ export class UserService {
     const users = await this.prisma.user.findMany({
       where: {
         deleted: false,
-        verified: true,
       },
     });
 
@@ -26,10 +24,27 @@ export class UserService {
     return users;
   }
 
-  async findOne(id: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+  async findOne(id: string): Promise<Prisma.UserWhereInput | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        lastName: true,
+        telegramId: true,
+        deleted: true,
+        verified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     return user;
+  }
+
+  findOneByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
   update(id: string, updateUserDto: Prisma.UserUpdateInput): Promise<User> {

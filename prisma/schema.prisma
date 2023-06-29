@@ -22,7 +22,7 @@ model User {
   name          String?      @default("name")
   lastName      String?      @default("lastName")
   password      String
-  telegramId    Int?         @unique @default(0)
+  telegramId    Int?
   verified      Boolean      @default(false)
   deleted       Boolean      @default(false)
   createdCourse Course[]

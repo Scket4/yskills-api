@@ -12,6 +12,7 @@ import { TechnologyCourseModule } from './api/technology-course/technology-cours
 import { UserCourseModule } from './api/user-course/user-course.module';
 import { CourseFileModule } from './api/course-file/course-file.module';
 import { LessonFileModule } from './api/lesson-file/lesson-file.module';
+import { AuthModule } from './api/auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LessonFileModule } from './api/lesson-file/lesson-file.module';
     UserCourseModule,
     CourseFileModule,
     LessonFileModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
